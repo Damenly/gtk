@@ -307,7 +307,7 @@ gdk_save_png (GdkTexture *texture)
   gsize stride;
   const guchar *data;
   int y;
-  GdkMemoryTexture *memtex;
+  GdkMemoryTexture *memtex = NULL;
   GdkMemoryFormat format;
   int png_format;
   int depth;

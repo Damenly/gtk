@@ -174,12 +174,12 @@ gdk_load_jpeg (GBytes  *input_bytes,
     case JCS_GRAYSCALE:
     case JCS_RGB:
       stride = 3 * width;
-      data = g_try_malloc_n (stride, height);
+      data = g_try_malloc0_n (stride, height);
       format = GDK_MEMORY_R8G8B8;
       break;
     case JCS_CMYK:
       stride = 4 * width;
-      data = g_try_malloc_n (stride, height);
+      data = g_try_malloc0_n (stride, height);
       format = GDK_MEMORY_R8G8B8A8_PREMULTIPLIED;
       break;
     default:
@@ -242,7 +242,7 @@ gdk_save_jpeg (GdkTexture *texture)
   struct jpeg_compress_struct info;
   struct error_handler_data jerr;
   struct jpeg_error_mgr err;
-  guchar *data;
+  guchar *data = NULL;
   gulong size = 0;
   guchar *input = NULL;
   GdkMemoryTexture *memtex = NULL;
