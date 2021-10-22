@@ -532,7 +532,16 @@ gtk_builder_get_parameters (GtkBuilder         *builder,
   GError *error = NULL;
 
   if (!properties)
-    return;
+    {
+      parameters->names = NULL;
+      parameters->values = NULL;
+      if (filtered_parameters)
+        {
+          filtered_parameters->names = NULL;
+          filtered_parameters->values = NULL;
+        }
+      return;
+    }
 
   for (guint i = 0; i < properties->len; i++)
     {
