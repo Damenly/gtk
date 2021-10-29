@@ -895,7 +895,7 @@ modelbutton.flat arrow {
 
 /* oldstyle toolbar buttons */
 
-.toolbar button {
+.toolbar > button {
   margin: 1px;
 
    @extend %button_basic_flat;
