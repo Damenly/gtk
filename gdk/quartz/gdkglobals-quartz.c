@@ -26,31 +26,58 @@ GdkDisplay *_gdk_display = NULL;
 GdkScreen *_gdk_screen = NULL;
 GdkWindow *_gdk_root = NULL;
 
+static inline GdkOSXVersion
+__gdk_quartz_osx_version(gint32 major, gint32 minor)
+{
+  GdkOSXVersion ver;
+
+  g_return_val_if_fail (major > GDK_OSX_MAJOR_MIN, GDK_OSX_UNSUPPORTED);
+  g_return_val_if_fail (major <= GDK_OSX_MAJOR_MAX, GDK_OSX_NEW);
+
+  /* for [OS_TIGER, OS_X_CATALINA]. */
+  if (major == 10) {
+    if (minor < GDK_OSX_MIN)
+      return GDK_OSX_UNSUPPORTED;
+    else if (minor <= GDK_OSX_CATALINA)
+      return GDK_OSX_NEW;
+    else
+      return minor;
+  }
+
+  /* Since BIG SUR, OSX tends to bump major number instead of minor. */
+  switch (major) {
+    case GDK_OSX_MAJOR_BIGSUR:
+      ver = GDK_OSX_BIGSUR;
+      break;
+    case GDK_OSX_MAJOR_MONTEREY:
+      ver = GDK_OSX_MONTEREY;
+      break;
+    default:
+      ver = GDK_OSX_NEW;
+  }
+
+  return ver;
+}
+
 GdkOSXVersion
 gdk_quartz_osx_version (void)
 {
   static gint32 minor = GDK_OSX_UNSUPPORTED;
+  gint32 major;
 
-  if (minor == GDK_OSX_UNSUPPORTED)
-    {
 #if MAC_OS_X_VERSION_MIN_REQUIRED < 101000
-      OSErr err = Gestalt (gestaltSystemVersionMinor, (SInt32*)&minor);
+  OSErr err = Gestalt (gestaltSystemVersionMinor, (SInt32*)&minor);
 
-      g_return_val_if_fail (err == noErr, GDK_OSX_UNSUPPORTED);
+  g_return_val_if_fail (err == noErr, GDK_OSX_UNSUPPORTED);
+  major = 10;
+
 #else
-      NSOperatingSystemVersion version;
+  NSOperatingSystemVersion version;
 
-      version = [[NSProcessInfo processInfo] operatingSystemVersion];
-      minor = version.minorVersion;
-      if (version.majorVersion == 11)
-        minor += 16;
+  version = [[NSProcessInfo processInfo] operatingSystemVersion];
+  minor = version.minorVersion;
+  major = version.majorVersion;
 #endif
-    }
 
-  if (minor < GDK_OSX_MIN)
-    return GDK_OSX_UNSUPPORTED;
-  else if (minor > GDK_OSX_CURRENT)
-    return GDK_OSX_NEW;
-  else
-    return minor;
+  return __gdk_quartz_osx_version(version.majorVersion, version.minorVersion);
 }
